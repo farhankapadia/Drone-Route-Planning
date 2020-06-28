@@ -85,7 +85,7 @@ Follow these steps to convert any map into a **```.shp``` (Shapefile)** format :
 ## Alternative Setup
 You can run this project as a **native desktop application** (Windows) without any prerequisite requirements: 
 
-1. Download [install.rar](https://github.com/karved/Drone-route-planning/blob/master/install.rar) file.
+1. Download [install.rar](https://github.com/farhankapadia/Drone-Route-Planning/blob/master/install.rar) file.
 2. Extract this file and navigate to **install** folder.
 3. Double click on **```djik.exe```**
 4. All set.
