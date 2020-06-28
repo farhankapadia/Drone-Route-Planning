@@ -36,7 +36,7 @@
 
 ## Implementation
 
-Algorithms used, Cases covered and Example can be found **[here](https://github.com/karved/Drone-route-planning/blob/master/Implementation.md)**.
+Algorithms used, Cases covered and Example can be found **[here](https://github.com/farhankapadia/Drone-Route-Planning/blob/master/Implementation.md)**.
 
 ## Screenshots 
 |||
