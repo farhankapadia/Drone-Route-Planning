@@ -47,6 +47,7 @@ new=2
 
 n= n
 matrix= weight_matrix
+new_route=0
 # print(n)
 # print(matrix)
 
@@ -82,6 +83,7 @@ gmap1.draw(pathy+"map40.html")
 url= pathy+"map40.html"
 webbrowser.open(url, new=new)
 
+
 """
 # Souce Sink
 source = ord(str(input("Select Source Node: ")))
@@ -116,21 +118,31 @@ def details():
     drones= dro.get()
     depr= depre.get()
 
-    
-    if((0>depr) or (depr>100)):
-                messagebox.showerror("INVALID", "Enter a Value between 0 and 100") 
+    if(source == sink ):
+        messagebox.showinfo("Prompt","Source and Sink are same !")
     else:
-                charge_screen.destroy()
+
+        if((chr(source+65) in chst) or (chr(sink+65) in chst)):
+            messagebox.showwarning("Error","Source or Sink cannot be Charging Station !")
+        else:
+            if(0>drones):
+                messagebox.showerror("INVALID", "Enter a Value greater than or equal to 0")
+            else:
+
+                if((0>depr) or (depr>100)):
+                            messagebox.showerror("INVALID", "Enter a Value between 0 and 100") 
+                else:
+                            charge_screen.destroy()
         
     
         
 
 charge_screen= Tk()
 charge_screen.title("D-Route")
-charge_screen['bg']='light steel blue'
+charge_screen['bg']='bisque'
 charge_screen.geometry("700x500")
 
-Label(charge_screen, font=("calibri","15"),bg="light steel blue",text="Choose source node: ").place(x=30, y=30)
+Label(charge_screen, font=("calibri","15"),bg="bisque",text="Choose source node: ").place(x=30, y=30)
 list1= []
 src= StringVar()
 snk= StringVar()
@@ -138,26 +150,26 @@ for i in range(n):
     list1.append(chr(i+65))
 droplist= OptionMenu(charge_screen, src, *list1)
 src.set('A')
-droplist.config(width=5,bd="0",font=("calibri","15","bold"),bg="light steel blue")
+droplist.config(width=5,bd="0",font=("calibri","15","bold"),bg="white")
 droplist.place(x= 400, y= 30)
-Label(charge_screen,bg="light steel blue", font=("calibri","15"),text="Choose sink node: ").place(x= 30, y= 90)
+Label(charge_screen,bg="bisque", font=("calibri","15"),text="Choose sink node: ").place(x= 30, y= 90)
 droplist1= OptionMenu(charge_screen, snk, *list1)
 snk.set('A')
-droplist1.config(width= 5,bd="0",font=("calibri","15","bold"),bg="light steel blue")
+droplist1.config(width= 5,bd="0",font=("calibri","15","bold"),bg="white")
 droplist1.place(x= 400, y= 80)
-Label(charge_screen, bg="light steel blue", font=("calibri","15"),text="Choose Charging Stations if needed\n(denoted in Blue): ").place(x=30, y= 150)
+Label(charge_screen, bg="bisque", font=("calibri","15"),text="Choose Charging Stations if needed\n(denoted in Blue): ").place(x=30, y= 150)
 chst_check=[]
 for i in range(n):
     chst_check.append(IntVar(charge_screen))
 xrange= 370
 for i  in range(n):
-    Checkbutton(charge_screen,bg="light steel blue" , font=("calibri","15","bold"),text=chr(i+65), variable= chst_check[i]).place(x= xrange, y=150)
+    Checkbutton(charge_screen,bg="bisque" , font=("calibri","15","bold"),text=chr(i+65), variable= chst_check[i]).place(x= xrange, y=150)
     xrange= xrange +50
 dro= IntVar()
 depre= IntVar()
-Label(charge_screen,bg="light steel blue", font=("calibri","15"), text="Enter No. of drones: ").place(x=30, y=230)
+Label(charge_screen,bg="bisque", font=("calibri","15"), text="Enter No. of drones: ").place(x=30, y=230)
 Entry(charge_screen, width="5",font=("calibri","15","bold"),textvar= dro).place(x=410, y=230)
-Label(charge_screen,bg="light steel blue", font=("calibri","15"), text="Enter the Loss Rate\n(% per unit): ").place(x= 30, y= 290)
+Label(charge_screen,bg="bisque", font=("calibri","15"), text="Enter the Loss Rate\n(% per unit): ").place(x= 30, y= 290)
 Entry(charge_screen,width="5", font=("calibri","15","bold"),textvar= depre).place(x=410, y=290)
 Button(charge_screen, font=("calibri","15"),width=10,activebackground="grey",bg="white",text="Plan Route", command=details).place(x=30, y= 380)
 charge_screen.mainloop()
@@ -292,7 +304,8 @@ color_count=0
 flag=0
 
 def calc(bat):
-    global color_count, flag , reached
+    global color_count, flag , reached, no_charge_stn
+    no_charge_stn=0
     route.reverse()
     # print(route)
     weight = 0
@@ -301,7 +314,7 @@ def calc(bat):
 
         mylist.insert(END,chr(route[0]+65)+"-> ")
         print(chr(route[0]+65),end="-> ")
-
+               
         if(len(route)>1):
             for i in range(1,len(route)):
              if((route[i]!="none") and (route[i-1]!="none")):
@@ -310,9 +323,10 @@ def calc(bat):
                     weight = weight +  (matrix[route[i-1],route[i]])
                     bat = bat-(depr*(matrix[route[i-1],route[i]]))
                     rem[route[i]]=1
-                    taken[route[i]]=1
 
-
+                    if(route[i] not in chst):
+                        taken[route[i]]=1
+                        
                     print(chr(route[i]+65),end="-> ")
                     mylist.insert(END,chr(route[i]+65)+"-> ")
 
@@ -323,46 +337,58 @@ def calc(bat):
                         
                         global plot_lat_list
                         global plot_long_list
-                        global color
-
+                        global color, new_route
                         plot_lat_list=[]
                         plot_long_list=[]
-                        for i in route[:-1]:
-                            plot_lat_list.append(lat_list[i])
-                            plot_long_list.append(long_list[i])
+                        #print(route)
+                        if new_route==0:
+                            for i in route[:-1]:
+                                plot_lat_list.append(lat_list[i])
+                                plot_long_list.append(long_list[i])
+                        elif new_route==1:
+                            for i in route[:-2]:
+                                plot_lat_list.append(lat_list[i])
+                                plot_long_list.append(long_list[i])
                         color= colors[color_count]
                         gmap2.plot(plot_lat_list, plot_long_list, color, edge_width=2.5)
                         flag=1
-                        #print(route)
-                        
                         route.clear()
+                        print()
+                        mylist.insert(END,"\n")
                         bat,a= djik2(s,s1,bat)
+                        print(no_charge_stn)
+                        if new_route==1:
+                            flag=1
+                        new_route=0
                         break
 
                     else:
                         print("No charge stn.")
-                        mylist.insert(END,"No charge stn.")
+                        mylist.insert(END,"No charge stn.\n")
+                        no_charge_stn=1
                         weight = 99999
                         break
 
              else:
                 print("none",end="")
-                mylist.insert(END,"none")
+                mylist.insert(END,"none\n")
                 break
     else:
         print("None")
     
     #print(route)
-    plot_lat_list=[]
-    plot_long_list=[]
-    for i in route:
-        plot_lat_list.append(lat_list[i])
-        plot_long_list.append(long_list[i])
-    color= colors[color_count]
-    gmap2.plot(plot_lat_list, plot_long_list, color, edge_width=2.5)
-    if flag==0:
-        color_count= color_count + 1
+    if no_charge_stn==0:
+        plot_lat_list=[]
+        plot_long_list=[]
+        for i in route:
+            plot_lat_list.append(lat_list[i])
+            plot_long_list.append(long_list[i])
+        color= colors[color_count]
+        gmap2.plot(plot_lat_list, plot_long_list, color, edge_width=2.5)
+        if flag==0:
+            color_count= color_count + 1
     flag=0
+
 
     
     return bat,(weight+a)
@@ -370,7 +396,7 @@ def calc(bat):
 # Djikstras for charging station
 def djik2(sink,source,battery):
     
-    global flag
+    global flag, no_charge_stn
    
 
     prev.fill(99999)
@@ -391,6 +417,7 @@ def djik2(sink,source,battery):
 
     if(minis!=99999):
         loc(mini,source)
+        #flag=1
         bat,a= calc(battery)
         if(a < 99999):
             prev.fill(99999)
@@ -403,16 +430,19 @@ def djik2(sink,source,battery):
             djik(mini)
             loc(sink,mini)
             flag=1
+            print()
+            mylist.insert(END,"\n")
             bat,wgt= calc(100)
-
             return bat,(a+wgt)
 
         else:  
             reached = 0
+            no_charge_stn=1
             return bat,a
 
     else:
         a=99999
+        no_charge_stn=1
         print("no charge stn.")
         return battery,a
 
@@ -462,17 +492,20 @@ root = Tk()
 root.title("D-Route")
 root.geometry("600x700")    
 # #set window color
-root['bg']='light steel blue'
+root['bg']='bisque'
 
-label = Label(root, text = "\nShortest Path ",font=("calibri","20","bold"),bg="light steel blue")
+label = Label(root, text = "\nShortest Path (approx. in km)",font=("calibri","20","bold"),bg="bisque")
 label.pack()
   
 
-mylist = Text(root,height=250,font=("calibri","15"),width=30,bg="light steel blue", borderwidth=0,highlightthickness=0) 
+mylist = Text(root,height=250,font=("calibri","15"),width=30,bg="bisque", borderwidth=0,highlightthickness=0) 
 mylist.pack(pady=20) 
 
 
 print("\n---------Shortest Path---------")
+
+
+
 dno=0
 arr = np.transpose(np.nonzero(matrix[0]))
 path = len(arr)
@@ -488,7 +521,6 @@ m = path if path<drones else drones
 i=0
 while(i<m):
     
-
     prev.fill(99999)
     w.fill(99999)
     w[source]= 0
@@ -506,7 +538,7 @@ while(i<m):
         if((wgt<99999) and (wgt>0)):
             mylist.insert(END,wgt)
             print(wgt)
-            mylist.insert(END,"\nBattery: {0}%\n\n".format(battery[dno-1]))
+            mylist.insert(END,"\nBattery: {0}%\n".format(battery[dno-1]))
             print("Battery: {0}%\n".format(battery[dno-1]))
         else:
             dno=dno-1
@@ -517,11 +549,15 @@ while(i<m):
         path=path-1
 
     i=i+1
-    for j in range(i+1,len(arr)):
-        if(taken[arr[j,0]]==1):
+    
+    for j in range(i,len(arr)):
+        if((taken[arr[j,0]]==1) and (matrix[arr[j,0],0]!=0)):
             path=path-1
+
+    
     
     m = path if path<drones else drones
+  
 
   
 
@@ -543,9 +579,10 @@ if(drones>path):
             source = s
             w[source]= 0
             rem[source]=1
-
             djik(source)
             loc(i,source)
+            new_route=1
+            
             dno=dno+1
             mylist.insert(END,"\nDrone {0}:\n".format(dno))
             print("Drones {0}:".format(dno))
@@ -574,7 +611,7 @@ if(drones>path):
                     print(a+wgt)
                     
                     print("Battery: {0}%\n".format(battery[dno-1]))
-                    mylist.insert(END,"\nBattery: {0}%\n\n".format(battery[dno-1]))
+                    mylist.insert(END,"\nBattery: {0}%\n".format(battery[dno-1]))
                     
                 else:
                     dno=dno-1
