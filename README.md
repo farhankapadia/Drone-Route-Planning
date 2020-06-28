@@ -68,7 +68,7 @@ Follow these steps to convert any map into a **```.shp``` (Shapefile)** format :
 
 ## Setup
 1. Clone this repository or download zip.  
-2. Open this repository on terminal. Navigate to [src](https://github.com/karved/Drone-route-planning/tree/master/src) folder by typing ```cd src```.
+2. Open this repository on terminal. Navigate to [src](https://github.com/farhankapadia/Drone-Route-Planning/tree/master/src) folder by typing ```cd src```.
 
 3. Type (if mentioned above **python modules** are not installed)  
 
