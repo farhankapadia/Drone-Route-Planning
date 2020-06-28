@@ -5,15 +5,18 @@ import math
 from math import radians, sin, cos, acos
 from tkinter import filedialog
 from tkinter import *
+from tkinter import messagebox
 import gmplot
-import webbrowser
+import webbrowser, random
+from PIL import ImageTk,Image
+import os
 
 l=[]
 # print(l)
-"""
-def euclidean_dist(x1, y1, x2, y2):
-    return int((math.sqrt((x1-x2)**2 + (y1-y2)**2))*300)
-"""
+# """
+# def euclidean_dist(x1, y1, x2, y2):
+#     return int((math.sqrt((x1-x2)**2 + (y1-y2)**2))*300)
+# """
 def dist_points(x1, y1, x2, y2):
      return int(6371.01 * acos(sin(radians(x1))*sin(radians(x2)) + cos(radians(x1))*cos(radians(x2))*cos(radians(y1) - radians(y2))))
   
@@ -32,13 +35,23 @@ def inputs():
     
     lat_list=[]
     long_list=[]
-    colors= ["blue", "cyan", "green", "purple", "yellow", "brown", "violet"]
+    colors=[]
+    r= lambda : random.randint(0, 255)
+    for i in range(n):
+        s= '#%02X%02X%02X' % (r(),r(),r())
+        if s in colors:
+            i= i-1
+        else:
+            colors.append(s)
+    #colors= ["blue", "cyan", "green", "purple", "yellow", "brown", "violet"]
     for i in range(len(sf)):
         lat_list.append(l[i][1])
         long_list.append(l[i][0])
         mean_lat= np.mean(lat_list)
         mean_long= np.mean(long_list)
     
+    print(lat_list) #change here
+    print(long_list)
     new=2
     gmap3= gmplot.GoogleMapPlotter(mean_lat, mean_long, 13)
     gmap3.coloricon = "http://www.googlemapsmarkers.com/v1/%s/"
@@ -52,10 +65,12 @@ def inputs():
 
     root.destroy()
     ip_screen= Tk()
-    ip_screen.title("D-Route")
+    ip_screen.title("D-Route : Check Nodes which are connected")
     ip_screen.geometry("600x500")
+
     #set window color
-    ip_screen['bg']='light steel blue'
+    ip_screen['bg']='bisque'
+    
 
     edge_matrix= [[] * i for i in range(n)]
     for i in range(n):
@@ -65,21 +80,24 @@ def inputs():
     text1=65
     text2=65
     for i in range(n):
-        Label(ip_screen,background="light steel blue", font=("calibri","15","bold"),width=6,text=chr(text1)).grid(row= 1, column=i, padx=20)
+        Label(ip_screen,background="bisque", font=("calibri","15","bold"),width=6,text=chr(text1)).grid(row= 1, column=i, padx=20)
         text1= text1 + 1
     for i in range(n):
-        Label(ip_screen,background="light steel blue",font=("calibri","15","bold"),width=6,text=chr(text2)).grid(row=i+2, sticky= W, pady=20)
+        Label(ip_screen,background="bisque",font=("calibri","15","bold"),width=6,text=chr(text2)).grid(row=i+2, sticky= W, pady=20)
         text2= text2 + 1
     zero_var=0
     for i in range(n):
         for j in range(n):
             if i==j:
-                Checkbutton(ip_screen,bg="light steel blue", variable=zero_var).grid(row=i+2, column= j, padx=20)
+                Checkbutton(ip_screen,bg="bisque", variable=zero_var).grid(row=i+2, column= j, padx=20)
             elif i<j:
-                Checkbutton(ip_screen,bg="light steel blue", variable=edge_matrix[i][j]).grid(row=i+2, column= j, padx=20)
+                Checkbutton(ip_screen,bg="bisque", variable=edge_matrix[i][j]).grid(row=i+2, column= j, padx=20)
             else:
-                Checkbutton(ip_screen,bg="light steel blue",variable=edge_matrix[j][i]).grid(row=i+2, column= j, padx=20)
+                Checkbutton(ip_screen,bg="bisque",variable=edge_matrix[j][i]).grid(row=i+2, column= j, padx=20)
+
+
     Button(ip_screen,font=("calibri","15"),width=7,activebackground="grey",bg="white",text="Next -->", command= submit).grid(sticky=S)
+    messagebox.showinfo("Prompt","Check Nodes which are connected")
     ip_screen.mainloop()
     #print(sf.shape(2).shapeTypeName)
     #n= len(sf)
@@ -87,16 +105,16 @@ def inputs():
     #print(sf.shapes())
     #print(sf.shape(0))
     #print(sf.shape(0).points)
-    """
-    for i in range(n):
-        for j in range(n):
-            if i==j:
-                ip=0
-            elif i<j:
-                ip= int(input("Is there an edge between {0} and {1} (1 for yes, 0 for no)? ".format(chr(i+65), chr(j+65))))
-                edge_matrix[i][j]= ip
-                edge_matrix[j][i]= ip
-    """        
+    # """
+    # for i in range(n):
+    #     for j in range(n):
+    #         if i==j:
+    #             ip=0
+    #         elif i<j:
+    #             ip= int(input("Is there an edge between {0} and {1} (1 for yes, 0 for no)? ".format(chr(i+65), chr(j+65))))
+    #             edge_matrix[i][j]= ip
+    #             edge_matrix[j][i]= ip
+    # """        
 
     
 def submit():
@@ -129,11 +147,27 @@ def sel ():
 
 root = Tk()
 root.title("D-Route")
-root.geometry("400x250")
+root.geometry("600x650")
  
 
+
+
+#set width and height
+
+canvas=Canvas(root,width=600,height=400)
+
+# used drone.jpeg from pics folder , took file directory of running file and traversed to pics folder
+target_path_2 = os.path.join(os.path.dirname(__file__), '..\pics\drone.jpeg')
+
+image=ImageTk.PhotoImage(Image.open(target_path_2))
+
+canvas.create_image(0,0,anchor=NW,image=image)
+canvas.pack()
+
+
 #set window color
-root['bg']='light steel blue'
+root['bg']='bisque'
+
 
 button =Button(text="Select File",command=sel,font=("calibri","15"),width=10,activebackground="grey",bg="white")
 button.pack(pady=20) 
